@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  fastapi_server_valid:
+    container_name: fastapi_server_working
+    build: ./app
+    restart: always
+    command: "sh -c 'poetry add 'sqlalchemy==1.4.35' && uvicorn main:app --workers 1 --host 0.0.0.0 --port 8000'"
+    env_file: ".env"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+  fastapi_server_invalid:
+    container_name: fastapi_server_not_working
+    build: ./app
+    restart: always
+    command: "sh -c 'uvicorn main:app --workers 1 --host 0.0.0.0 --port 8000'"
+    env_file: ".env"
+    ports:
+      - "8001:8000"
+    depends_on:
+      - database
+
+  database:
+    image: postgres:13.4
+    container_name: database
+    ports:
+      - "5454:5432"  # Remove this on production
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
